@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { ListColumn } from './ListColumn';
 import { TaskCard } from './TaskCard';
+import { CreateListDialog } from './CreateListDialog';
 import { ProjectWithLists, Task, ListWithTasks } from '@/types';
 
 interface ProjectBoardProps {
@@ -163,14 +164,11 @@ export function ProjectBoard({
             ))}
             
             <div className="flex-shrink-0">
-              <Button
-                variant="ghost"
-                className="w-72 h-12 border-2 border-dashed border-border hover:border-border-light hover:bg-muted/50"
-                onClick={onAddList}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add another list
-              </Button>
+              <CreateListDialog
+                projectId={project.id}
+                projectName={project.name}
+                onListCreate={(listData) => onAddList?.()}
+              />
             </div>
           </div>
         </div>

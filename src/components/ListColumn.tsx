@@ -4,6 +4,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus, MoreHorizontal } from 'lucide-react';
 import { TaskCard } from './TaskCard';
+import { CreateTaskDialog } from './CreateTaskDialog';
 import { ListWithTasks } from '@/types';
 
 interface ListColumnProps {
@@ -57,15 +58,11 @@ export function ListColumn({ list, onTaskClick, onAddTask }: ListColumnProps) {
           </SortableContext>
         </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-secondary"
-          onClick={() => onAddTask?.(list.id)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add a card
-        </Button>
+        <CreateTaskDialog
+          listId={list.id}
+          listName={list.name}
+          onTaskCreate={(taskData) => onAddTask?.(list.id)}
+        />
       </CardContent>
     </Card>
   );

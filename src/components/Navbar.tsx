@@ -2,14 +2,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Search, Plus, Bell, Settings } from 'lucide-react';
+import { CreateProjectDialog } from './CreateProjectDialog';
+import { useNavigate } from 'react-router-dom';
 
 export function Navbar() {
+  const navigate = useNavigate();
+
   return (
     <nav className="border-b border-border bg-background h-14 flex items-center justify-between px-6">
       <div className="flex items-center gap-6">
-        <div className="font-bold text-lg text-foreground">
+        <button 
+          onClick={() => navigate('/')}
+          className="font-bold text-lg text-foreground hover:text-primary transition-colors"
+        >
           ProjectBoard
-        </div>
+        </button>
         
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -21,10 +28,14 @@ export function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm">
-          <Plus className="h-4 w-4 mr-2" />
-          Create
-        </Button>
+        <CreateProjectDialog 
+          trigger={
+            <Button variant="ghost" size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              Create
+            </Button>
+          }
+        />
         
         <Button variant="ghost" size="sm">
           <Bell className="h-4 w-4" />

@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Navbar } from '@/components/Navbar';
+import { CreateProjectDialog } from '@/components/CreateProjectDialog';
 import { ArrowRight, Users, Calendar, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -82,9 +83,13 @@ const Index = () => {
             <Button size="lg" onClick={() => navigate('/project/demo')}>
               Try Demo Project
             </Button>
-            <Button size="lg" variant="outline">
-              Learn More
-            </Button>
+            <CreateProjectDialog 
+              trigger={
+                <Button size="lg" variant="outline">
+                  Create New Project
+                </Button>
+              }
+            />
           </div>
         </div>
       </main>

@@ -15,10 +15,11 @@ export interface Workspace {
 export interface Project {
   id: number;
   project_uid: string;
-  workspace_id: number;
   name: string;
   description?: string;
   status: string;
+  color: string;
+  position?: number;
   start_date?: string;
   end_date?: string;
   created_at: string;
@@ -33,6 +34,7 @@ export interface List {
   list_uid: string;
   project_id: number;
   name: string;
+  color: string;
   position: number;
   created_at: string;
   created_by: string;
@@ -49,6 +51,9 @@ export interface Task {
   description?: string;
   priority?: string;
   status: string;
+  color: string;
+  position?: number;
+  is_completed: boolean;
   due_date?: string;
   completed_at?: string;
   created_at: string;
@@ -102,3 +107,81 @@ export interface ApiError {
   message: string;
   statusCode: number;
 }
+
+// Request Types for API calls
+export interface ProjectRequest {
+  name: string;
+  description?: string;
+  status?: string;
+  color?: string;
+  position?: number;
+  start_date?: string;
+  end_date?: string;
+}
+
+export interface ProjectUpdateRequest {
+  name?: string;
+  description?: string;
+  status?: string;
+  color?: string;
+  position?: number;
+  start_date?: string;
+  end_date?: string;
+}
+
+export interface ListRequest {
+  project_uid: string;
+  name: string;
+  color?: string;
+  position?: number;
+}
+
+export interface ListUpdateRequest {
+  name?: string;
+  color?: string;
+  position?: number;
+}
+
+export interface TaskRequest {
+  list_uid: string;
+  title: string;
+  description?: string;
+  priority?: string;
+  status?: string;
+  color?: string;
+  position?: number;
+  is_completed?: boolean;
+  due_date?: string;
+}
+
+export interface TaskUpdateRequest {
+  title?: string;
+  description?: string;
+  priority?: string;
+  status?: string;
+  color?: string;
+  position?: number;
+  is_completed?: boolean;
+  due_date?: string;
+}
+
+// Color constants
+export const COLORS = {
+  WHITE: '#FFFFFF',
+  RED: '#EF4444',
+  BLUE: '#3B82F6',
+  GREEN: '#10B981',
+  YELLOW: '#F59E0B',
+  ORANGE: '#F97316',
+  PURPLE: '#8B5CF6',
+} as const;
+
+export const COLOR_OPTIONS = [
+  { name: 'White', value: COLORS.WHITE },
+  { name: 'Red', value: COLORS.RED },
+  { name: 'Blue', value: COLORS.BLUE },
+  { name: 'Green', value: COLORS.GREEN },
+  { name: 'Yellow', value: COLORS.YELLOW },
+  { name: 'Orange', value: COLORS.ORANGE },
+  { name: 'Purple', value: COLORS.PURPLE },
+] as const;

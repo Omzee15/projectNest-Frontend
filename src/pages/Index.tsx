@@ -43,10 +43,10 @@ const Index = () => {
           </p>
           <Button 
             size="lg" 
-            onClick={() => navigate('/project/demo')}
+            onClick={() => navigate('/projects')}
             className="text-lg px-8 py-6"
           >
-            View Demo Project
+            Go to Projects
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
@@ -80,8 +80,8 @@ const Index = () => {
             Create your first project and start collaborating today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={() => navigate('/project/demo')}>
-              Try Demo Project
+            <Button size="lg" onClick={() => navigate('/projects')}>
+              View All Projects
             </Button>
             <CreateProjectDialog 
               trigger={

@@ -3,22 +3,27 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { apiService } from '@/services/api';
+import { COLORS } from '@/types';
 
 interface CreateListDialogProps {
-  projectId: number;
+  projectUid: string;
   projectName: string;
-  onListCreate?: (listData: any) => void;
+  onListCreate?: () => void;
   trigger?: React.ReactNode;
 }
 
-export function CreateListDialog({ projectId, projectName, onListCreate, trigger }: CreateListDialogProps) {
+export function CreateListDialog({ projectUid, projectName, onListCreate, trigger }: CreateListDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
+  const [color, setColor] = useState<string>(COLORS.WHITE);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
@@ -30,22 +35,43 @@ export function CreateListDialog({ projectId, projectName, onListCreate, trigger
       return;
     }
 
-    const listData = {
-      name: name.trim(),
-      project_id: projectId,
-      position: Date.now(), // Simple position based on timestamp
-    };
+    setIsLoading(true);
 
-    onListCreate?.(listData);
-    
-    // Reset form
-    setName('');
-    setOpen(false);
+    try {
+      const listData = {
+        project_uid: projectUid,
+        name: name.trim(),
+        color,
+        position: 0, // Let backend auto-calculate position
+      };
 
-    toast({
-      title: 'List created',
-      description: `List "${name}" added to ${projectName}`,
-    });
+      console.log('[CreateListDialog] Creating list with data:', listData);
+
+      await apiService.createList(listData);
+      
+      // Reset form
+      setName('');
+      setColor(COLORS.WHITE);
+      setOpen(false);
+      setIsLoading(false);
+
+      toast({
+        title: 'List created',
+        description: `List "${name}" added to ${projectName}`,
+      });
+
+      // Notify parent to refresh data
+      onListCreate?.();
+
+    } catch (error) {
+      console.error('[CreateListDialog] Failed to create list:', error);
+      setIsLoading(false);
+      toast({
+        title: 'Failed to create list',
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -74,6 +100,15 @@ export function CreateListDialog({ projectId, projectName, onListCreate, trigger
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>List Color</Label>
+            <ColorPicker
+              value={color}
+              onChange={setColor}
+              size="md"
             />
           </div>
 

@@ -18,6 +18,17 @@ export function Navbar() {
           ProjectBoard
         </button>
         
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate('/projects')}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Projects
+          </Button>
+        </div>
+        
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input

@@ -5,25 +5,30 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { Plus, Calendar, Flag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { apiService } from '@/services/api';
+import { COLORS } from '@/types';
 
 interface CreateTaskDialogProps {
-  listId: number;
+  listUid: string;
   listName: string;
   onTaskCreate?: (taskData: any) => void;
   trigger?: React.ReactNode;
 }
 
-export function CreateTaskDialog({ listId, listName, onTaskCreate, trigger }: CreateTaskDialogProps) {
+export function CreateTaskDialog({ listUid, listName, onTaskCreate, trigger }: CreateTaskDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('medium');
+  const [color, setColor] = useState<string>(COLORS.WHITE);
   const [dueDate, setDueDate] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) {
@@ -35,27 +40,46 @@ export function CreateTaskDialog({ listId, listName, onTaskCreate, trigger }: Cr
       return;
     }
 
-    const taskData = {
-      title: title.trim(),
-      description: description.trim(),
-      priority,
-      due_date: dueDate || null,
-      list_id: listId,
-    };
+    setIsLoading(true);
 
-    onTaskCreate?.(taskData);
-    
-    // Reset form
-    setTitle('');
-    setDescription('');
-    setPriority('medium');
-    setDueDate('');
-    setOpen(false);
+    try {
+      const taskData = {
+        list_uid: listUid,
+        title: title.trim(),
+        description: description.trim() || undefined,
+        priority: priority || undefined,
+        color,
+        status: 'todo',
+        due_date: dueDate || undefined,
+      };
 
-    toast({
-      title: 'Task created',
-      description: `Task "${title}" added to ${listName}`,
-    });
+      const response = await apiService.createTask(taskData);
+      
+      // Call callback with the created task
+      onTaskCreate?.(response.data);
+      
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setPriority('medium');
+      setColor(COLORS.WHITE);
+      setDueDate('');
+      setOpen(false);
+
+      toast({
+        title: 'Success',
+        description: `Task "${title}" has been created successfully`,
+      });
+    } catch (error) {
+      console.error('Failed to create task:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create task. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -96,6 +120,15 @@ export function CreateTaskDialog({ listId, listName, onTaskCreate, trigger }: Cr
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Task Color</Label>
+            <ColorPicker
+              value={color}
+              onChange={setColor}
+              size="md"
             />
           </div>
 
@@ -149,10 +182,15 @@ export function CreateTaskDialog({ listId, listName, onTaskCreate, trigger }: Cr
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="submit" className="flex-1">
-              Create Task
+            <Button type="submit" className="flex-1" disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create Task'}
             </Button>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
           </div>

@@ -4,26 +4,30 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Plus, Calendar } from 'lucide-react';
+import { ColorPicker } from '@/components/ui/color-picker';
+import { Plus, Calendar, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { apiService } from '@/services/api';
+import { Project, COLORS } from '@/types';
 
 interface CreateProjectDialogProps {
-  workspaceId?: number;
-  onProjectCreate?: (projectData: any) => void;
+  onProjectCreate?: (project: Project) => void;
   trigger?: React.ReactNode;
 }
 
-export function CreateProjectDialog({ workspaceId = 1, onProjectCreate, trigger }: CreateProjectDialogProps) {
+export function CreateProjectDialog({ onProjectCreate, trigger }: CreateProjectDialogProps) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [color, setColor] = useState<string>(COLORS.WHITE);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
@@ -44,31 +48,49 @@ export function CreateProjectDialog({ workspaceId = 1, onProjectCreate, trigger 
       return;
     }
 
-    const projectData = {
-      name: name.trim(),
-      description: description.trim(),
-      workspace_id: workspaceId,
-      start_date: startDate || null,
-      end_date: endDate || null,
-      status: 'active',
-    };
+    setIsLoading(true);
 
-    onProjectCreate?.(projectData);
-    
-    // Reset form
-    setName('');
-    setDescription('');
-    setStartDate('');
-    setEndDate('');
-    setOpen(false);
+    try {
+      const projectData = {
+        name: name.trim(),
+        description: description.trim() || undefined,
+        color,
+        start_date: startDate || undefined,
+        end_date: endDate || undefined,
+        status: 'active',
+      };
 
-    toast({
-      title: 'Project created',
-      description: `Project "${name}" has been created successfully`,
-    });
+      const response = await apiService.createProject(projectData);
+      const newProject = response.data;
 
-    // Navigate to the new project (using demo for now)
-    navigate('/project/demo');
+      // Call the callback with the created project
+      onProjectCreate?.(newProject);
+      
+      // Reset form
+      setName('');
+      setDescription('');
+      setColor(COLORS.WHITE);
+      setStartDate('');
+      setEndDate('');
+      setOpen(false);
+
+      toast({
+        title: 'Success',
+        description: `Project "${name}" has been created successfully`,
+      });
+
+      // Navigate to the new project
+      navigate(`/project/${newProject.project_uid}`);
+    } catch (error) {
+      console.error('Failed to create project:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to create project. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -108,6 +130,15 @@ export function CreateProjectDialog({ workspaceId = 1, onProjectCreate, trigger 
             />
           </div>
 
+          <div className="space-y-2">
+            <Label>Project Color</Label>
+            <ColorPicker
+              value={color}
+              onChange={setColor}
+              size="md"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start-date">Start Date</Label>
@@ -139,10 +170,22 @@ export function CreateProjectDialog({ workspaceId = 1, onProjectCreate, trigger 
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="submit" className="flex-1">
-              Create Project
+            <Button type="submit" className="flex-1" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Create Project'
+              )}
             </Button>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
           </div>

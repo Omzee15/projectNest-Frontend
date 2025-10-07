@@ -165,6 +165,18 @@ export interface TaskUpdateRequest {
   due_date?: string;
 }
 
+// Progress tracking types for Phase 2
+export interface ProjectProgress {
+  total_tasks: number;
+  completed_tasks: number;
+  todo_tasks: number;
+  progress: number;
+}
+
+export interface ProjectWithProgress extends Project {
+  task_stats: ProjectProgress;
+}
+
 // Color constants
 export const COLORS = {
   WHITE: '#FFFFFF',

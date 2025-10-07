@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Navbar } from '@/components/Navbar';
 import { CreateProjectDialog } from '@/components/CreateProjectDialog';
-import { Project } from '@/types';
+import { AnimatedProgress } from '@/components/AnimatedProgress';
+import { Project, ProjectWithProgress } from '@/types';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Calendar, Users, ArrowRight, Loader2, Trash2, MoreVertical } from 'lucide-react';
@@ -27,7 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<ProjectWithProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingProject, setDeletingProject] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<{uid: string, name: string} | null>(null);
@@ -41,7 +42,7 @@ export default function Projects() {
   const loadProjects = async () => {
     try {
       setIsLoading(true);
-      const response = await apiService.getProjects();
+      const response = await apiService.getProjectsWithProgress();
       setProjects(response.data || []);
     } catch (error) {
       console.error('Failed to load projects:', error);
@@ -56,7 +57,17 @@ export default function Projects() {
   };
 
   const handleProjectCreated = (newProject: Project) => {
-    setProjects(prev => [newProject, ...prev]);
+    // Convert Project to ProjectWithProgress with empty stats
+    const projectWithProgress: ProjectWithProgress = {
+      ...newProject,
+      task_stats: {
+        total_tasks: 0,
+        completed_tasks: 0,
+        todo_tasks: 0,
+        progress: 0
+      }
+    };
+    setProjects(prev => [projectWithProgress, ...prev]);
     toast({
       title: 'Success',
       description: 'Project created successfully!',
@@ -204,6 +215,29 @@ export default function Projects() {
                     )}
                   </CardHeader>
                   <CardContent>
+                    {/* Progress Section */}
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
+                        <span>Progress</span>
+                        <span>{project.task_stats?.completed_tasks || 0}/{project.task_stats?.total_tasks || 0} tasks</span>
+                      </div>
+                      <AnimatedProgress 
+                        value={(project.task_stats?.progress || 0) * 100} 
+                        className="h-2" 
+                      />
+                      
+                      <div className="flex gap-4 mt-3 text-xs">
+                        <span className="flex items-center gap-1">
+                          <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                          {project.task_stats?.todo_tasks || 0} To Do
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          {project.task_stats?.completed_tasks || 0} Done
+                        </span>
+                      </div>
+                    </div>
+                    
                     <div className="space-y-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />

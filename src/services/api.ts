@@ -4,7 +4,8 @@ import {
   Project, List, Task, ProjectWithLists, ApiResponse,
   ProjectRequest, ProjectUpdateRequest,
   ListRequest, ListUpdateRequest,
-  TaskRequest, TaskUpdateRequest
+  TaskRequest, TaskUpdateRequest,
+  ProjectProgress, ProjectWithProgress
 } from '@/types';
 
 const BACKEND_PORT = import.meta.env.VITE_BACKEND_PORT || '8080';
@@ -74,6 +75,14 @@ class ApiService {
   // Projects
   async getProjects(): Promise<ApiResponse<Project[]>> {
     return this.request('/projects');
+  }
+
+  async getProjectsWithProgress(): Promise<ApiResponse<ProjectWithProgress[]>> {
+    return this.request('/projects?include_progress=true');
+  }
+
+  async getProjectProgress(id: string): Promise<ApiResponse<ProjectProgress>> {
+    return this.request(`/projects/${id}/progress`);
   }
 
   async getProject(id: string): Promise<ApiResponse<ProjectWithLists>> {

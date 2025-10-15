@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { ColorPicker } from '@/components/ui/color-picker';
-import { Plus, Calendar, Loader2 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Plus, Calendar, Loader2, Lock, Globe, ChevronDown, Database } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '@/services/api';
@@ -23,6 +25,9 @@ export function CreateProjectDialog({ onProjectCreate, trigger }: CreateProjectD
   const [color, setColor] = useState<string>(COLORS.WHITE);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [dbmlContent, setDbmlContent] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -57,6 +62,8 @@ export function CreateProjectDialog({ onProjectCreate, trigger }: CreateProjectD
         color,
         start_date: startDate || undefined,
         end_date: endDate || undefined,
+        is_private: isPrivate,
+        dbml_content: dbmlContent.trim() || undefined,
         status: 'active',
       };
 
@@ -72,6 +79,9 @@ export function CreateProjectDialog({ onProjectCreate, trigger }: CreateProjectD
       setColor(COLORS.WHITE);
       setStartDate('');
       setEndDate('');
+      setIsPrivate(false);
+      setDbmlContent('');
+      setShowAdvanced(false);
       setOpen(false);
 
       toast({
@@ -103,9 +113,12 @@ export function CreateProjectDialog({ onProjectCreate, trigger }: CreateProjectD
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-lg bg-background border border-border">
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
+          <DialogDescription>
+            Enter the details for your new project below.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -139,6 +152,35 @@ export function CreateProjectDialog({ onProjectCreate, trigger }: CreateProjectD
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="project-privacy">Project Privacy</Label>
+            <div className="flex items-center justify-between rounded-lg border p-3">
+              <div className="flex items-center space-x-3">
+                {isPrivate ? (
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                )}
+                <div>
+                  <div className="text-sm font-medium">
+                    {isPrivate ? 'Private Project' : 'Public Project'}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {isPrivate 
+                      ? 'Only you can access this project'
+                      : 'Project can be shared with others'
+                    }
+                  </div>
+                </div>
+              </div>
+              <Switch
+                id="project-privacy"
+                checked={isPrivate}
+                onCheckedChange={setIsPrivate}
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start-date">Start Date</Label>
@@ -168,6 +210,47 @@ export function CreateProjectDialog({ onProjectCreate, trigger }: CreateProjectD
               </div>
             </div>
           </div>
+
+          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-2 w-full justify-between p-0 h-auto">
+                <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4" />
+                  <span>Database Schema (DBML)</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2 mt-2">
+              <Label htmlFor="dbml-content">DBML Content</Label>
+              <Textarea
+                id="dbml-content"
+                placeholder={`Enter your database schema in DBML format (optional)...
+
+Example:
+Table users {
+  id integer [primary key]
+  username varchar
+  email varchar [unique]
+  created_at timestamp
+}
+
+Table posts {
+  id integer [primary key]
+  title varchar
+  content text
+  user_id integer [ref: > users.id]
+}`}
+                value={dbmlContent}
+                onChange={(e) => setDbmlContent(e.target.value)}
+                rows={8}
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Add your database schema in DBML format. This will be saved with your project and can be viewed in the DB Viewer.
+              </p>
+            </CollapsibleContent>
+          </Collapsible>
 
           <div className="flex gap-2 pt-4">
             <Button type="submit" className="flex-1" disabled={isLoading}>

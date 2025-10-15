@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Zoom Persistence and Stability */
+html {
+  /* Prevent unwanted zoom resets */
+  touch-action: manipulation;
+  /* Allow browser zoom to persist */
+  -webkit-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  text-size-adjust: none;
+  /* Improve zoom behavior */
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  /* Prevent horizontal scrolling that might interfere with zoom */
+  overflow-x: hidden;
+  /* Ensure consistent rendering during zoom */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent zoom issues with fixed elements */
+* {
+  box-sizing: border-box;
+}
+
+/* Improve zoom behavior for the main app container */
+#root {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 /* Clean Project Management Design System - Monochrome Theme */
 
 @layer base {
@@ -54,6 +86,10 @@
     --radius: 0.5rem;
     --radius-sm: 0.25rem;
     --radius-lg: 0.75rem;
+    
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
 
     --sidebar-background: 0 0% 98%;
 
@@ -79,7 +115,7 @@
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 47.4% 11.2%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 210 40% 98%;

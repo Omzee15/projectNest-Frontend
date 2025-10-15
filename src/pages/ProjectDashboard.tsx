@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ProjectBoard } from '@/components/ProjectBoard';
 import { Navbar } from '@/components/Navbar';
 import { ProjectWithLists, Project, ListWithTasks, Task } from '@/types';
-import { mockProject } from '@/utils/mockData';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProjectDashboard() {
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
   const [project, setProject] = useState<ProjectWithLists | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -19,8 +19,12 @@ export default function ProjectDashboard() {
 
   const loadProject = async () => {
     if (!projectId) {
-      setProject(mockProject);
-      setIsLoading(false);
+      toast({
+        title: 'No Project Selected',
+        description: 'Redirecting to projects list...',
+        variant: 'default',
+      });
+      navigate('/projects');
       return;
     }
 
@@ -30,38 +34,21 @@ export default function ProjectDashboard() {
       setProject(response.data);
     } catch (error) {
       console.error('Failed to load project:', error);
-      // Try to redirect to a valid project or show the projects list
-      try {
-        const projectsResponse = await apiService.getProjects();
-        if (projectsResponse.data && projectsResponse.data.length > 0) {
-          // Use the first valid project
-          const firstProject = projectsResponse.data[0];
-          const validProjectResponse = await apiService.getProject(firstProject.project_uid);
-          setProject(validProjectResponse.data);
-          
-          toast({
-            title: 'Project Not Found',
-            description: `Loading "${firstProject.name}" instead.`,
-            variant: 'default',
-          });
-        } else {
-          // Fallback to mock data if no projects exist
-          setProject(mockProject);
-          toast({
-            title: 'Using Demo Data',
-            description: 'No projects found. Showing demo project.',
-            variant: 'default',
-          });
-        }
-      } catch (fallbackError) {
-        console.error('Fallback also failed:', fallbackError);
-        setProject(mockProject);
-        toast({
-          title: 'Using Demo Data',
-          description: 'Could not connect to backend. Showing demo project.',
-          variant: 'default',
-        });
+      
+      // Check if this is an authentication error
+      if (error instanceof Error && error.message.includes('Authentication failed')) {
+        // Don't handle auth errors here, let them propagate to AuthGuard
+        throw error;
       }
+      
+      toast({
+        title: 'Project Not Found',
+        description: 'This project does not exist or you do not have access to it.',
+        variant: 'destructive',
+      });
+      
+      // Redirect to projects list
+      navigate('/projects');
     } finally {
       setIsLoading(false);
     }
@@ -93,16 +80,8 @@ export default function ProjectDashboard() {
 
   const handleAddTask = async (listUid: string, taskData: any) => {
     try {
-      const taskRequest = {
-        list_uid: listUid,
-        title: taskData.title,
-        description: taskData.description,
-        priority: taskData.priority,
-        status: 'todo', // Default status for new tasks
-        due_date: taskData.due_date,
-      };
-
-      await apiService.createTask(taskRequest);
+      // taskData already has the correct structure from CreateTaskDialog
+      await apiService.createTask(taskData);
       
       toast({
         title: 'Task created',
@@ -204,15 +183,35 @@ export default function ProjectDashboard() {
 
   const handleTaskUpdate = (taskUid: string, updatedTask: Task) => {
     if (project) {
+      const updatedLists = project.lists.map(list => ({
+        ...list,
+        tasks: (list.tasks || []).map(task => 
+          task.task_uid === taskUid ? updatedTask : task
+        )
+      }));
+
       setProject({
         ...project,
-        lists: project.lists.map(list => ({
-          ...list,
-          tasks: list.tasks.map(task =>
-            task.task_uid === taskUid ? updatedTask : task
-          )
-        }))
+        lists: updatedLists
       });
+    }
+  };
+
+  const handleListMove = async (listId: string, newPosition: number) => {
+    // Update local state immediately for responsive UI
+    if (project) {
+      const updatedLists = [...project.lists];
+      const listIndex = updatedLists.findIndex(list => list.list_uid === listId);
+      
+      if (listIndex !== -1) {
+        const [movedList] = updatedLists.splice(listIndex, 1);
+        updatedLists.splice(newPosition, 0, movedList);
+        
+        setProject({
+          ...project,
+          lists: updatedLists
+        });
+      }
     }
   };
 
@@ -258,6 +257,7 @@ export default function ProjectDashboard() {
         onProjectUpdate={handleProjectUpdate}
         onListUpdate={handleListUpdate}
         onTaskUpdate={handleTaskUpdate}
+        onListMove={handleListMove}
       />
     </div>
   );

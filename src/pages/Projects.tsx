@@ -16,10 +16,11 @@ import {
 import { Navbar } from '@/components/Navbar';
 import { CreateProjectDialog } from '@/components/CreateProjectDialog';
 import { AnimatedProgress } from '@/components/AnimatedProgress';
+import { DashboardAIChat } from '@/components/DashboardAIChat';
 import { Project, ProjectWithProgress } from '@/types';
 import { apiService } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Calendar, Users, ArrowRight, Loader2, Trash2, MoreVertical } from 'lucide-react';
+import { Plus, Calendar, Users, ArrowRight, Loader2, Trash2, MoreVertical, Bot } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +33,7 @@ export default function Projects() {
   const [isLoading, setIsLoading] = useState(true);
   const [deletingProject, setDeletingProject] = useState<string | null>(null);
   const [projectToDelete, setProjectToDelete] = useState<{uid: string, name: string} | null>(null);
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -133,7 +135,7 @@ export default function Projects() {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <main className="container mx-auto px-6 py-8">
+      <main className="w-[90vw] mx-auto py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
@@ -180,12 +182,12 @@ export default function Projects() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {projects.map((project) => (
-              <Card 
-                key={project.project_uid} 
-                className="hover:shadow-lg transition-all duration-200 group relative"
-              >
+                <Card 
+                  key={project.project_uid} 
+                  className="hover:shadow-lg transition-all duration-200 group relative"
+                >
                 <div
                   className="cursor-pointer"
                   onClick={() => navigate(`/project/${project.project_uid}`)}
@@ -320,6 +322,23 @@ export default function Projects() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* AI Chat Floating Button */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          size="lg"
+          onClick={() => setIsAIChatOpen(true)}
+          className="rounded-full h-14 w-14 shadow-lg hover:shadow-xl transition-shadow"
+          title="Open AI Assistant"
+        >
+          <Bot className="h-6 w-6" />
+        </Button>
+      </div>
+      {/* AI Chat Component */}
+      <DashboardAIChat 
+        isOpen={isAIChatOpen} 
+        onClose={() => setIsAIChatOpen(false)} 
+      />
     </div>
   );
 }

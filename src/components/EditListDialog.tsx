@@ -97,7 +97,7 @@ export function EditListDialog({ list, open, onOpenChange, onListUpdated }: Edit
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] bg-background border border-border">
         <DialogHeader>
           <DialogTitle>Edit List</DialogTitle>
           <DialogDescription>
@@ -105,7 +105,7 @@ export function EditListDialog({ list, open, onOpenChange, onListUpdated }: Edit
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">Name *</Label>
             <Input
@@ -114,10 +114,11 @@ export function EditListDialog({ list, open, onOpenChange, onListUpdated }: Edit
               onChange={(e) => handleInputChange('name', e.target.value)}
               placeholder="Enter list name"
               required
+              className="text-base"
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label>Color</Label>
             <ColorPicker
               value={formData.color || '#FFFFFF'}
@@ -125,7 +126,7 @@ export function EditListDialog({ list, open, onOpenChange, onListUpdated }: Edit
             />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
               type="button"
               variant="outline"

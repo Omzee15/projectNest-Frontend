@@ -22,6 +22,10 @@ export interface Project {
   position?: number;
   start_date?: string;
   end_date?: string;
+  is_private: boolean;
+  dbml_content?: string;
+  dbml_layout_data?: string;
+  flowchart_content?: string;
   created_at: string;
   created_by: string;
   updated_at?: string;
@@ -79,20 +83,20 @@ export interface WorkspaceMember {
 }
 
 export interface ProjectMember {
-  id: number;
-  project_id: number;
-  user_id: string;
+  user_uid: string;
+  email: string;
+  name: string;
   role: string;
   joined_at: string;
 }
 
 // Frontend UI Types
 export interface ProjectWithLists extends Project {
-  lists: ListWithTasks[];
+  lists: ListWithTasks[] | null;
 }
 
 export interface ListWithTasks extends List {
-  tasks: Task[];
+  tasks: Task[] | null;
 }
 
 // API Response Types
@@ -117,6 +121,10 @@ export interface ProjectRequest {
   position?: number;
   start_date?: string;
   end_date?: string;
+  is_private?: boolean;
+  dbml_content?: string;
+  dbml_layout_data?: string;
+  flowchart_content?: string;
 }
 
 export interface ProjectUpdateRequest {
@@ -127,6 +135,10 @@ export interface ProjectUpdateRequest {
   position?: number;
   start_date?: string;
   end_date?: string;
+  is_private?: boolean;
+  dbml_content?: string;
+  dbml_layout_data?: string;
+  flowchart_content?: string;
 }
 
 export interface ListRequest {
@@ -197,3 +209,154 @@ export const COLOR_OPTIONS = [
   { name: 'Orange', value: COLORS.ORANGE },
   { name: 'Purple', value: COLORS.PURPLE },
 ] as const;
+
+// Phase 3: Brainstorming & Planning Layer Types
+
+export interface BrainstormCanvas {
+  canvas_uid: string;
+  project_id: number;
+  state_json: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface Note {
+  note_uid: string;
+  project_id: number;
+  title: string;
+  content: NoteContent;
+  folder_id?: number;
+  position?: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface NotesResponse {
+  notes: Note[];
+  total: number;
+}
+
+// Folder types
+export interface NoteFolder {
+  id: number;
+  folder_uid: string;
+  project_id: number;
+  parent_folder_id?: number;
+  name: string;
+  position?: number;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface NoteFoldersResponse {
+  folders: NoteFolder[];
+  total: number;
+}
+
+export interface NoteFolderRequest {
+  name: string;
+  parent_folder_id?: number;
+  position?: number;
+}
+
+// Phase 3 Request types
+export interface CanvasRequest {
+  state_json: string;
+}
+
+// Note content structures matching backend
+export interface NoteChecklistItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface NoteBlockMetadata {
+  level?: number;
+  style?: string;
+}
+
+export interface NoteBlock {
+  id: string;
+  type: string; // "text", "checklist", "heading"
+  content?: string;
+  metadata?: NoteBlockMetadata;
+  items?: NoteChecklistItem[];
+  children?: NoteBlock[];
+}
+
+export interface NoteContent {
+  blocks: NoteBlock[];
+}
+
+export interface NoteRequest {
+  title: string;
+  content: NoteContent;
+  folder_id?: number;
+  position?: number;
+}
+
+export interface NoteUpdateRequest {
+  title?: string;
+  content?: NoteContent;
+  folder_id?: number;
+  position?: number;
+}
+
+// DEV AI Chat Types
+export interface ChatMessage {
+  message_uid: string;
+  conversation_uid: string;
+  message_type: 'user' | 'ai';
+  content: string;
+  created_at: string;
+  isLoading?: boolean; // Frontend only for UI state
+}
+
+export interface ChatConversation {
+  conversation_uid: string;
+  project_uid: string;
+  name: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface ChatConversationWithMessages extends ChatConversation {
+  messages: ChatMessage[];
+}
+
+export interface ChatConversationRequest {
+  name: string;
+}
+
+export interface ChatMessageRequest {
+  conversation_uid: string;
+  content: string;
+  message_type: 'user' | 'ai';
+}
+
+// AI Project Creation Types
+export interface AIListRequest {
+  name: string;
+  description: string;
+  position: number;
+}
+
+export interface AITaskRequest {
+  title: string;
+  description: string;
+  list_name: string;
+  priority: string;
+  status: string;
+  position: number;
+}
+
+// AI Project Creation Types
+export interface AIProjectCreationRequest {
+  project_content: string;
+}
+
+export interface AIProjectCreationResponse {
+  message: string;
+  project: Project;
+}

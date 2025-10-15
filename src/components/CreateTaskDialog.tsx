@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { Plus, Calendar, Flag } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { apiService } from '@/services/api';
 import { COLORS } from '@/types';
 
 interface CreateTaskDialogProps {
@@ -53,10 +52,8 @@ export function CreateTaskDialog({ listUid, listName, onTaskCreate, trigger }: C
         due_date: dueDate || undefined,
       };
 
-      const response = await apiService.createTask(taskData);
-      
-      // Call callback with the created task
-      onTaskCreate?.(response.data);
+      // Call callback with the task data - parent will handle API call
+      await onTaskCreate?.(taskData);
       
       // Reset form
       setTitle('');
@@ -96,7 +93,7 @@ export function CreateTaskDialog({ listUid, listName, onTaskCreate, trigger }: C
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto bg-background border border-border">
         <DialogHeader>
           <DialogTitle>Create New Task</DialogTitle>
         </DialogHeader>
@@ -109,6 +106,7 @@ export function CreateTaskDialog({ listUid, listName, onTaskCreate, trigger }: C
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               autoFocus
+              className="w-full"
             />
           </div>
 
@@ -120,23 +118,26 @@ export function CreateTaskDialog({ listUid, listName, onTaskCreate, trigger }: C
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
+              className="w-full resize-none"
             />
           </div>
 
           <div className="space-y-2">
             <Label>Task Color</Label>
-            <ColorPicker
-              value={color}
-              onChange={setColor}
-              size="md"
-            />
+            <div className="w-full">
+              <ColorPicker
+                value={color}
+                onChange={setColor}
+                size="md"
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Priority</Label>
               <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -171,7 +172,7 @@ export function CreateTaskDialog({ listUid, listName, onTaskCreate, trigger }: C
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 w-full"
                 />
               </div>
             </div>

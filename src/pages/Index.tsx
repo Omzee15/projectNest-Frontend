@@ -4,9 +4,19 @@ import { Navbar } from '@/components/Navbar';
 import { CreateProjectDialog } from '@/components/CreateProjectDialog';
 import { ArrowRight, Users, Calendar, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Index = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check if user is already authenticated
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Redirect to projects if already logged in
+      navigate('/projects');
+    }
+  }, [navigate]);
 
   const features = [
     {
@@ -41,13 +51,12 @@ const Index = () => {
             A clean, intuitive project management platform inspired by Trello. 
             Create lists, manage tasks, and collaborate with your team effortlessly.
           </p>
-          <Button 
+                    <Button 
             size="lg" 
-            onClick={() => navigate('/projects')}
-            className="text-lg px-8 py-6"
+            onClick={() => navigate('/login')}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8"
           >
-            Go to Projects
-            <ArrowRight className="ml-2 h-5 w-5" />
+            Get Started <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
 
@@ -80,7 +89,7 @@ const Index = () => {
             Create your first project and start collaborating today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={() => navigate('/projects')}>
+            <Button size="lg" onClick={() => navigate('/login')}>
               View All Projects
             </Button>
             <CreateProjectDialog 

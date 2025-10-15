@@ -125,7 +125,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onTaskUpdated }: Edit
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto bg-background border border-border">
         <DialogHeader>
           <DialogTitle>Edit Task</DialogTitle>
           <DialogDescription>
@@ -142,6 +142,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onTaskUpdated }: Edit
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="Enter task title"
               required
+              className="w-full"
             />
           </div>
 
@@ -153,17 +154,18 @@ export function EditTaskDialog({ task, open, onOpenChange, onTaskUpdated }: Edit
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Enter task description (optional)"
               rows={3}
+              className="w-full resize-none"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
               <Select
                 value={formData.priority || ''}
                 onValueChange={(value) => handleInputChange('priority', value || undefined)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -180,7 +182,7 @@ export function EditTaskDialog({ task, open, onOpenChange, onTaskUpdated }: Edit
                 value={formData.status}
                 onValueChange={(value) => handleInputChange('status', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -194,10 +196,12 @@ export function EditTaskDialog({ task, open, onOpenChange, onTaskUpdated }: Edit
 
           <div className="space-y-2">
             <Label>Color</Label>
-            <ColorPicker
-              value={formData.color || '#FFFFFF'}
-              onChange={(color) => handleInputChange('color', color)}
-            />
+            <div className="w-full">
+              <ColorPicker
+                value={formData.color || '#FFFFFF'}
+                onChange={(color) => handleInputChange('color', color)}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -207,19 +211,21 @@ export function EditTaskDialog({ task, open, onOpenChange, onTaskUpdated }: Edit
               type="date"
               value={formData.due_date}
               onChange={(e) => handleInputChange('due_date', e.target.value)}
+              className="w-full"
             />
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

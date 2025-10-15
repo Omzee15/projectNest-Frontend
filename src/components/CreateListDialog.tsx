@@ -87,7 +87,7 @@ export function CreateListDialog({ projectUid, projectName, onListCreate, trigge
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-background border border-border">
         <DialogHeader>
           <DialogTitle>Create New List</DialogTitle>
         </DialogHeader>

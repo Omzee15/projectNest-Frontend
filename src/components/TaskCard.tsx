@@ -119,6 +119,19 @@ export function TaskCard({ task, onClick, onTaskDelete, onTaskUpdate, onTaskEdit
     }
   };
 
+  const getStatusBorderClass = (status?: string) => {
+    switch (status) {
+      case 'completed':
+        return 'border-l-4 border-l-green-500';
+      case 'in_progress':
+        return 'border-l-4 border-l-yellow-500';
+      case 'todo':
+        return 'border-l-4 border-l-gray-300';
+      default:
+        return 'border-l-4 border-l-gray-300';
+    }
+  };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -137,6 +150,7 @@ export function TaskCard({ task, onClick, onTaskDelete, onTaskUpdate, onTaskEdit
         cursor-pointer transition-all duration-200 hover:shadow-md group relative
         ${isDragging ? 'opacity-50 rotate-2 scale-105' : ''}
         ${task.is_completed ? 'opacity-75 bg-muted' : 'bg-card hover:bg-card-hover'}
+        ${getStatusBorderClass(task.status)}
         border-border-light
       `}
       onClick={onClick}
@@ -144,10 +158,10 @@ export function TaskCard({ task, onClick, onTaskDelete, onTaskUpdate, onTaskEdit
       <CardContent className="p-3 space-y-3">
         <div className="space-y-2">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2 flex-1">
+            <div className="flex items-start gap-2 flex-1 min-w-0">
               <div 
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 flex-shrink-0"
               >
                 <Checkbox
                   checked={task.is_completed}
@@ -157,7 +171,7 @@ export function TaskCard({ task, onClick, onTaskDelete, onTaskUpdate, onTaskEdit
                 />
                 <ColorIndicator color={task.color || '#FFFFFF'} size="sm" />
               </div>
-              <h4 className={`text-sm font-medium leading-tight flex-1 ${
+              <h4 className={`text-sm font-medium leading-tight flex-1 break-words word-wrap min-w-0 ${
                 task.is_completed ? 'line-through text-muted-foreground' : 'text-card-foreground'
               }`}>
                 {task.title}
@@ -247,6 +261,20 @@ export function TaskCard({ task, onClick, onTaskDelete, onTaskUpdate, onTaskEdit
               <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 <Flag className="w-3 h-3 mr-1" />
                 {task.priority}
+              </Badge>
+            )}
+            {task.status && (
+              <Badge 
+                variant="outline" 
+                className={`text-xs px-2 py-0.5 ${
+                  task.status === 'completed' 
+                    ? 'border-green-500 text-green-700 bg-green-50' 
+                    : task.status === 'in_progress' 
+                    ? 'border-yellow-500 text-yellow-700 bg-yellow-50'
+                    : 'border-gray-300 text-gray-600 bg-gray-50'
+                }`}
+              >
+                {task.status === 'in_progress' ? 'In Progress' : task.status}
               </Badge>
             )}
           </div>

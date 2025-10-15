@@ -1,4 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, MoreHorizontal, Trash2, Loader2, Edit } from 'lucide-react';
+import { Plus, MoreHorizontal, Trash2, Loader2, Edit, GripVertical } from 'lucide-react';
 import { TaskCard } from './TaskCard';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { EditListDialog } from './EditListDialog';
@@ -38,12 +40,43 @@ interface ListColumnProps {
   onListUpdate?: (listUid: string, updatedList: ListWithTasks) => void;
   onTaskDelete?: (taskUid: string) => void;
   onTaskUpdate?: (taskUid: string, updatedTask: Task) => void;
+  isDraggable?: boolean;
+  isDragOverlay?: boolean;
 }
 
-export function ListColumn({ list, onTaskClick, onAddTask, onListDelete, onListUpdate, onTaskDelete, onTaskUpdate }: ListColumnProps) {
-  const { setNodeRef } = useDroppable({
+export function ListColumn({ 
+  list, 
+  onTaskClick, 
+  onAddTask, 
+  onListDelete, 
+  onListUpdate, 
+  onTaskDelete, 
+  onTaskUpdate,
+  isDraggable = false,
+  isDragOverlay = false
+}: ListColumnProps) {
+  const { setNodeRef: setDroppableRef } = useDroppable({
     id: list.list_uid,
   });
+  
+  const {
+    attributes,
+    listeners,
+    setNodeRef: setSortableRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: list.list_uid,
+    disabled: !isDraggable || isDragOverlay,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditListDialog, setShowEditListDialog] = useState(false);
@@ -51,7 +84,7 @@ export function ListColumn({ list, onTaskClick, onAddTask, onListDelete, onListU
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const { toast } = useToast();
 
-  const taskIds = list.tasks.map(task => task.task_uid);
+  const taskIds = (list.tasks || []).map(task => task.task_uid);
 
   const handleDeleteList = async () => {
     try {
@@ -76,7 +109,7 @@ export function ListColumn({ list, onTaskClick, onAddTask, onListDelete, onListU
   const handleListUpdated = (updatedList: any) => {
     if (onListUpdate) {
       // Preserve the tasks when updating list
-      onListUpdate(list.list_uid, { ...updatedList, tasks: list.tasks });
+      onListUpdate(list.list_uid, { ...updatedList, tasks: list.tasks || [] });
     }
   };
 
@@ -99,19 +132,39 @@ export function ListColumn({ list, onTaskClick, onAddTask, onListDelete, onListU
     }
   };
 
+  // Combine the refs for both sortable and droppable functionality
+  const combineRefs = (node: HTMLElement | null) => {
+    setDroppableRef(node);
+    setSortableRef(node);
+  };
+
   return (
-    <Card className="w-72 flex-shrink-0 bg-muted/30 border-border-light">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ColorIndicator color={list.color || '#FFFFFF'} size="sm" />
-            <h3 className="font-semibold text-sm text-foreground">
-              {list.name}
-            </h3>
-          </div>
+    <div 
+      ref={combineRefs}
+      style={style}
+      {...(isDraggable ? attributes : {})}
+      className={isDragOverlay ? "pointer-events-none" : ""}
+    >
+      <Card className="w-72 flex-shrink-0 bg-muted/30 border-border-light">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {isDraggable && !isDragOverlay && (
+                <button
+                  {...listeners}
+                  className="cursor-grab hover:cursor-grabbing p-1 hover:bg-secondary rounded"
+                >
+                  <GripVertical className="h-4 w-4 text-muted-foreground" />
+                </button>
+              )}
+              <ColorIndicator color={list.color || '#FFFFFF'} size="sm" />
+              <h3 className="font-semibold text-sm text-foreground">
+                {list.name}
+              </h3>
+            </div>
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-              {list.tasks.length}
+              {(list.tasks || []).length}
             </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -181,12 +234,9 @@ export function ListColumn({ list, onTaskClick, onAddTask, onListDelete, onListU
       </CardHeader>
 
       <CardContent className="pt-0 pb-3 space-y-3">
-        <div
-          ref={setNodeRef}
-          className="space-y-2 min-h-2"
-        >
+        <div className="space-y-2 min-h-2">
           <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-            {list.tasks.map((task) => (
+            {(list.tasks || []).map((task) => (
               <TaskCard
                 key={task.task_uid}
                 task={task}
@@ -222,6 +272,7 @@ export function ListColumn({ list, onTaskClick, onAddTask, onListDelete, onListU
         }}
         onTaskUpdated={handleTaskUpdated}
       />
-    </Card>
+      </Card>
+    </div>
   );
 }

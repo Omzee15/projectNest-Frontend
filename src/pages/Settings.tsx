@@ -14,7 +14,7 @@ import { Palette, Globe, Bell, Volume2, Zap, Clock, User, Grid } from 'lucide-re
 
 const Settings: React.FC = () => {
   const { settings, loading, error, updateSettings, resetToDefaults } = useUserSettings();
-  const { availableThemes, setTheme: applyTheme } = useTheme();
+  const { availableThemes, setTheme: applyTheme, updateCurrentTheme } = useTheme();
   const [localSettings, setLocalSettings] = useState<UserSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
@@ -24,8 +24,12 @@ const Settings: React.FC = () => {
   useEffect(() => {
     if (settings) {
       setLocalSettings(settings);
+      // Update theme context to match user's saved theme
+      if (settings.theme) {
+        updateCurrentTheme(settings.theme);
+      }
     }
-  }, [settings]);
+  }, [settings, updateCurrentTheme]);
 
   const languages = [
     { code: 'en', name: 'English' },

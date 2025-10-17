@@ -5,6 +5,7 @@ interface ThemeContextType {
   currentTheme: string;
   availableThemes: Theme[];
   setTheme: (themeKey: string) => Promise<void>;
+  updateCurrentTheme: (themeKey: string) => void;
   isLoading: boolean;
 }
 
@@ -21,9 +22,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const initializeThemes = async () => {
+      console.log('ThemeProvider: Initializing themes...');
       try {
         // Load available themes
         const themes = await themeService.getAvailableThemes();
+        console.log('ThemeProvider: Available themes:', themes);
         setAvailableThemes(themes);
 
         // Preload all themes for faster switching
@@ -31,31 +34,49 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         await themeService.preloadThemes(themeKeys);
 
         // Apply current theme
+        console.log('ThemeProvider: Applying current theme:', currentTheme);
         await themeService.applyTheme(currentTheme);
       } catch (error) {
         console.error('Failed to initialize themes:', error);
       } finally {
         setIsLoading(false);
+        console.log('ThemeProvider: Initialization complete');
       }
     };
 
     initializeThemes();
-  }, [currentTheme]);
+  }, []); // Remove currentTheme dependency to avoid re-initialization
+
+  // Separate effect to handle theme changes
+  useEffect(() => {
+    if (!isLoading && currentTheme) {
+      console.log('ThemeProvider: Current theme changed to:', currentTheme);
+      themeService.applyTheme(currentTheme);
+    }
+  }, [currentTheme, isLoading]);
 
   const setTheme = async (themeKey: string): Promise<void> => {
+    console.log('ThemeProvider: setTheme called with:', themeKey);
     try {
       await themeService.applyTheme(themeKey);
       setCurrentTheme(themeKey);
+      console.log('ThemeProvider: Theme set successfully');
     } catch (error) {
       console.error('Failed to set theme:', error);
       throw error;
     }
   };
 
+  const updateCurrentTheme = (themeKey: string): void => {
+    console.log('ThemeProvider: updateCurrentTheme called with:', themeKey);
+    setCurrentTheme(themeKey);
+  };
+
   const value: ThemeContextType = {
     currentTheme,
     availableThemes,
     setTheme,
+    updateCurrentTheme,
     isLoading,
   };
 

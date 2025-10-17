@@ -156,3 +156,27 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Dialog Content Fix - Ensure dialogs are never dimmed by drag overlays */
+@layer components {
+  /* Force dialog content to have bright background and be unaffected by overlays */
+  [data-radix-dialog-content] {
+    background-color: white !important;
+    opacity: 1 !important;
+    filter: none !important;
+    isolation: isolate !important;
+  }
+
+  /* Ensure dialog text and elements are also bright */
+  [data-radix-dialog-content] * {
+    filter: none !important;
+  }
+
+  /* Additional safety for portal-rendered dialogs */
+  [data-radix-portal] [data-radix-dialog-content] {
+    background-color: white !important;
+    opacity: 1 !important;
+    filter: none !important;
+    isolation: isolate !important;
+  }
+}

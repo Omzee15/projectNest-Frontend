@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `http://localhost:${import.meta.env.VITE_BACKEND_PORT || '8080'}/api`;
+
 export interface UserSettings {
   settings_uid?: string;
   theme: string;
@@ -58,7 +60,7 @@ export const useUserSettings = (): UseUserSettingsReturn => {
       setError(null);
 
       const headers = getAuthHeaders();
-      const response = await fetch('/api/settings', { headers });
+      const response = await fetch(`${API_BASE_URL}/settings`, { headers });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -91,7 +93,7 @@ export const useUserSettings = (): UseUserSettingsReturn => {
       setError(null);
 
       const headers = getAuthHeaders();
-      const response = await fetch('/api/settings', {
+      const response = await fetch(`${API_BASE_URL}/settings`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(newSettings),
@@ -129,7 +131,7 @@ export const useUserSettings = (): UseUserSettingsReturn => {
       setError(null);
 
       const headers = getAuthHeaders();
-      const response = await fetch('/api/settings/reset', {
+      const response = await fetch(`${API_BASE_URL}/settings/reset`, {
         method: 'POST',
         headers,
       });

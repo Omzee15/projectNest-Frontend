@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -10,9 +11,10 @@ import { useToast } from '../hooks/use-toast';
 import { useUserSettings, UserSettings } from '../hooks/use-user-settings';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemePreview } from '../components/ThemePreview';
-import { Palette, Globe, Bell, Volume2, Zap, Clock, User, Grid } from 'lucide-react';
+import { Palette, Globe, Bell, Volume2, Zap, Clock, User, Grid, ArrowLeft } from 'lucide-react';
 
 const Settings: React.FC = () => {
+  const navigate = useNavigate();
   const { settings, loading, error, updateSettings, resetToDefaults } = useUserSettings();
   const { availableThemes, setTheme: applyTheme, updateCurrentTheme } = useTheme();
   const [localSettings, setLocalSettings] = useState<UserSettings | null>(null);
@@ -154,6 +156,17 @@ const Settings: React.FC = () => {
     return (
       <div className="container mx-auto p-6">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <User className="h-8 w-8" />
             Settings
@@ -177,6 +190,17 @@ const Settings: React.FC = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <User className="h-8 w-8" />
           Settings

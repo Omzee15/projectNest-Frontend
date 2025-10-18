@@ -617,8 +617,8 @@ Please try again in a moment, or let me know if you'd like to modify the project
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-6xl h-[80vh] flex flex-col">
-        <CardHeader className="flex-shrink-0">
+      <Card className="ai-chat-dialog bg-card border w-full max-w-6xl h-[80vh] flex flex-col shadow-2xl">
+        <CardHeader className="flex-shrink-0 bg-card border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Bot className="h-6 w-6 text-primary" />
@@ -634,9 +634,9 @@ Please try again in a moment, or let me know if you'd like to modify the project
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 flex gap-4 p-4 min-h-0">
+        <CardContent className="flex-1 flex gap-4 p-4 min-h-0 bg-card">
           {/* Conversations Sidebar */}
-          <div className="w-80 flex flex-col gap-4">
+          <div className="w-80 flex flex-col gap-4 bg-card">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
                 Conversations
@@ -747,7 +747,7 @@ Please try again in a moment, or let me know if you'd like to modify the project
           <Separator orientation="vertical" />
 
           {/* Chat Area */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 bg-card">
             {selectedConversation ? (
               <>
                 {/* Chat Header */}
@@ -781,7 +781,7 @@ Please try again in a moment, or let me know if you'd like to modify the project
                           className={`max-w-[70%] rounded-lg px-4 py-2 ${
                             message.type === 'user'
                               ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted'
+                              : 'ai-message-bg'
                           }`}
                         >
                           {message.isLoading ? (
@@ -842,7 +842,7 @@ Please try again in a moment, or let me know if you'd like to modify the project
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center">
+              <div className="flex-1 flex items-center justify-center bg-card">
                 <div className="text-center">
                   <Bot className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
                   <h3 className="text-lg font-semibold mb-2">Welcome to ProjectNest AI</h3>

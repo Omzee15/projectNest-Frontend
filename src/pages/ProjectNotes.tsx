@@ -6,15 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, FileText, Plus, Edit2, Trash2, Folder, 
   FolderPlus, ChevronRight, ChevronDown, MoreHorizontal, 
-  Save, Clock
+  Save, Clock, GitCompare
 } from 'lucide-react';
 import { apiService } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 import { Note, NoteContent, NoteBlock, NoteChecklistItem, NoteRequest } from '@/types';
 import { useAutoSave } from '@/hooks/use-auto-save';
+import DiffChecker from '@/components/DiffChecker';
 
 interface NoteFolder {
   folder_uid: string;
@@ -460,9 +462,9 @@ const ProjectNotesNotion: React.FC = () => {
   const folders = foldersResponse?.data?.folders || [];
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Header */}
-      <div className="bg-white border-b px-4 py-3 flex items-center gap-4">
+      <div className="bg-white border-b px-4 py-3 flex items-center gap-4 flex-shrink-0">
         <Button 
           variant="outline" 
           size="sm"
@@ -482,7 +484,23 @@ const ProjectNotesNotion: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      {/* Tabs */}
+      <Tabs defaultValue="notes" className="flex flex-1 flex-col overflow-hidden">
+        <div className="bg-white flex-shrink-0 h-10 flex items-center px-4">
+          <TabsList className="border-0 bg-transparent p-0">
+            <TabsTrigger value="notes" className="flex items-center gap-2 h-9">
+              <FileText className="w-4 h-4" />
+              Notes
+            </TabsTrigger>
+            <TabsTrigger value="diff" className="flex items-center gap-2 h-9">
+              <GitCompare className="w-4 h-4" />
+              Diff Checker
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="notes" className="flex flex-1 overflow-hidden !mt-0 m-0 p-0">
+          <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div className="w-80 bg-white border-r flex flex-col">
           {/* Sidebar Header */}
@@ -853,6 +871,12 @@ const ProjectNotesNotion: React.FC = () => {
           )}
         </div>
       </div>
+        </TabsContent>
+
+        <TabsContent value="diff" className="flex-1 overflow-hidden m-0 p-0 border-t">
+          <DiffChecker />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
